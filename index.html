@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApexAnalyze - AI Resume Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col">
+
+    <nav class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="showPage('home')">
+                <i class="fa-solid fa-laptop-code text-blue-600 text-2xl"></i>
+                <span class="font-bold text-xl tracking-tight bg-gradient-to-r freom-blue-600 to-indigo-600 bg-clip-text text-transparent">ApexAnalyze</span>
+            </div>
+            <div class="hidden md:flex space-x-8 font-medium">
+                <button onclick="showPage('home')" class="nav-link hover:text-blue-600 transition">Home</button>
+                <button onclick="showPage('analyzer')" class="nav-link hover:text-blue-600 transition">Analyzer</button>
+                <button onclick="showPage('dashboard')" class="nav-link hover:text-blue-600 transition">History</button>
+                <button onclick="showPage('tips')" class="nav-link hover:text-blue-600 transition">Writing Tips</button>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition" aria-label="Toggle Dark Mode">
+                    <i class="fa-solid fa-moon text-lg dark:hidden"></i>
+                    <i class="fa-solid fa-sun text-lg hidden dark:block"></i>
+                </button>
+                <button id="authBtn" onclick="toggleAuthModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium">Sign In</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <section id="homePage" class="page-section">
+            <div class="text-center py-12 max-w-3xl mx-auto">
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">Optimize Your Resume For <span class="text-blue-600">ATS Success</span></h1>
+                <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">Get instant AI-powered feedback, skill gap analysis, and keyword density tracking to land your dream interview.</p>
+                <button onclick="showPage('analyzer')" class="bg-blue-600 text-white text-lg px-8 py-4 rounded-xl font-semibold shadow-lg hover:bg-blue-700 transform hover:-translate-y-1 transition dynamic-btn">
+                    Start Free Analysis <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 mt-12">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <i class="fa-solid fa-bullseye text-blue-600 text-3xl mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">ATS Scoring</h3>
+                    <p class="text-gray-600 dark:text-gray-400">See exactly how parsing algorithms rate your formatting and structure.</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <i class="fa-solid fa-chart-pie text-indigo-600 text-3xl mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Skill Gap Analysis</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Visual charts pinpoint exactly what keywords are missing from your resume.</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <i class="fa-solid fa-shield-halved text-emerald-600 text-3xl mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Secure & Private</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Your data belongs to you. Files are automatically processed and securely discarded.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="analyzerPage" class="page-section hidden">
+            <h2 class="text-3xl font-bold mb-6 text-center">Analyze Your Profile</h2>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <label class="block text-sm font-semibold mb-2">1. Upload Resume (PDF or DOCX)</label>
+                        <div id="dropzone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center cursor-pointer hover:border-blue-500 transition relative">
+                            <input type="file" id="fileInput" accept=".pdf,.docx" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 mb-3"></i>
+                            <p class="font-medium" id="fileNameDisplay">Drag and drop your file here, or <span class="text-blue-600">browse</span></p>
+                            <p class="text-xs text-gray-400 mt-1">Supports PDF, DOCX up to 5MB</p>
+                        </div>
+                        <button onclick="loadSample()" class="text-xs text-blue-600 mt-2 underline block">Load Sample Resume</button>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <label class="block text-sm font-semibold mb-2">2. Paste Job Description</label>
+                        <textarea id="jobDescriptionInput" rows="8" class="w-full p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 transition" placeholder="Paste the target job description here..."></textarea>
+                    </div>
+
+                    <button onclick="runAnalysis()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-md flex justify-center items-center">
+                        <span id="btnText">Analyze Match Efficiency</span>
+                        <div id="btnSpinner" class="hidden animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent ml-3"></div>
+                    </button>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold mb-4"><i class="fa-solid fa-circle-info text-blue-600 mr-2"></i>Why optimization matters</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Over 90% of Fortune 500 companies utilize Applicant Tracking Systems (ATS) to filter out applicants before human eyes ever see a resume. Our platform reverse-engineers this parsing behavior.</p>
+                        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Identifies core structural anomalies.</li>
+                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Maps hard & soft industry skills.</li>
+                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Flags repetitive non-action phrases.</li>
+                        </ul>
+                    </div>
+                    <div class="border-t border-gray-100 dark:border-gray-700 pt-4 mt-6">
+                        <div class="flex items-center justify-between text-xs text-gray-400">
+                            <span>Analysis Engine v2.4.0</span>
+                            <span>Secure Endpoint Enabled</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="resultPage" class="page-section hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                <h2 class="text-3xl font-bold">Analysis Output Report</h2>
+                <div class="flex space-x-3">
+                    <button onclick="showPage('analyzer')" class="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"><i class="fa-solid fa-rotate-left mr-2"></i>Re-test</button>
+                    <button onclick="downloadReport()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"><i class="fa-solid fa-download mr-2"></i>Export PDF</button>
+                </div>
+            </div>
+
+            <div id="pdfContainer" class="grid lg:grid-cols-3 gap-8">
+                <div class="space-y-6 lg:col-span-1">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm text-center">
+                        <h3 class="text-sm uppercase font-semibold text-gray-400 tracking-wider mb-2">Overall Match Matrix</h3>
+                        <div class="relative flex items-center justify-center h-40">
+                            <span id="matchScoreDisplay" class="text-5xl font-black text-blue-600">82%</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                        <h4 class="font-bold text-sm mb-4 text-gray-400 uppercase tracking-wider">Skill Mapping Target</h4>
+                        <div class="h-48">
+                            <canvas id="skillChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6 lg:col-span-2">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                        <h3 class="text-xl font-bold mb-4">Keyword Analytics</h3>
+                        <div class="mb-4">
+                            <h4 class="text-sm font-semibold text-emerald-600 mb-2"><i class="fa-solid fa-circle-check mr-2"></i>Identified Competencies</h4>
+                            <div id="skillsFoundContainer" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-red-500 mb-2"><i class="fa-solid fa-circle-xmark mr-2"></i>Missing Core Competencies</h4>
+                            <div id="skillsMissingContainer" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                        <h3 class="text-xl font-bold mb-4">Strategic Improvement Vectors</h3>
+                        <ul id="suggestionsContainer" class="space-y-3"></ul>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                        <h3 class="text-xl font-bold mb-3">Structural Density Breakdown</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span>Action Verb Density</span><span class="font-bold">Excellent (4.8%)</span></div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full"><div class="bg-emerald-500 h-2 rounded-full" style="width: 85%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span>Buzzword Saturation Risk</span><span class="font-bold">Moderate (2.1%)</span></div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full"><div class="bg-yellow-500 h-2 rounded-full" style="width: 45%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="dashboardPage" class="page-section hidden">
+            <h2 class="text-3xl font-bold mb-6">Historical Evaluations</h2>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 dark:bg-gray-700 text-sm font-semibold">
+                                <th class="p-4">Target Job Profile</th>
+                                <th class="p-4">Timestamp</th>
+                                <th class="p-4">Match Efficiency</th>
+                                <th class="p-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="tipsPage" class="page-section hidden">
+            <h2 class="text-3xl font-bold mb-6 text-center">ATS & Resume Optimization Manual</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                    <h3 class="text-xl font-bold mb-4 text-blue-600"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Structural Directives</h3>
+                    <div class="space-y-4 text-gray-600 dark:text-gray-400 text-sm">
+                        <p><strong>Use Standard Section Headers:</strong> Stick to universal conventions like "Work Experience", "Education", and "Skills". Custom titles like "Where I've Been" trick structural regex parsers.</p>
+                        <p><strong>Quantify Everything:</strong> Replace ambiguous tasks with metrics. Change <i>"Responsible for managing servers"</i> to <i>"Maintained 99.98% uptime metrics across 14 enterprise server topologies."</i></p>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                    <h3 class="text-xl font-bold mb-4 text-red-500"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Critical Pitfalls to Avoid</h3>
+                    <div class="space-y-4 text-gray-600 dark:text-gray-400 text-sm">
+                        <p><strong>No Charts/Graphics for Content:</strong> While charts look good to humans, text trapped inside images or graphs is completely invisible to fundamental system text layers.</p>
+                        <p><strong>Avoid Header/Footer Text Data:</strong> Avoid putting crucial contact details inside the literal file margin properties. Put it cleanly at the top of the body flow.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="authModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl p-6 shadow-xl relative transform transition-transform duration-300">
+            <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="text-2xl font-bold mb-4">Access Cloud Management</h3>
+            <p class="text-sm text-gray-400 mb-6">Log in to safely persist and store evaluation telemetry.</p>
+            <form onsubmit="handleAuth(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm mb-1 font-medium">Identity Username / Email</label>
+                    <input type="email" required class="w-full p-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm mb-1 font-medium">Security Access Token (Password)</label>
+                    <input type="password" required class="w-full p-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition mt-2">Initialize Authentication</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 py-6 mt-12 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500 dark:text-gray-400">
+            &copy; 2026 ApexAnalyze Inc. Sandbox Environment Optimization.
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

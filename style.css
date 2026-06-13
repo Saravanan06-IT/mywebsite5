@@ -1,0 +1,33 @@
+/* Custom Active State Styles */
+.nav-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+/* Page Section visibility animation */
+.page-section {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Custom dark mode focus modifications overrides if necessary */
+input:focus, textarea:focus {
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* Base custom interactive button dynamics */
+.dynamic-btn:active {
+    transform: scale(0.98);
+}
